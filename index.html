@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XIS SENSI - Free Fire Packs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f5f5f7;color:#1a1a1a;line-height:1.6;overflow-x:hidden}
+body.grid-bg{background-image:linear-gradient(rgba(0,0,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.03) 1px,transparent 1px);background-size:40px 40px}
+
+.admin-bar{position:fixed;top:16px;left:16px;z-index:9999}
+.admin-btn{background:rgba(26,26,26,0.9);color:#fff;padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;display:flex;align-items:center;gap:8px;transition:all .3s;backdrop-filter:blur(10px);user-select:none;-webkit-user-select:none}
+.admin-btn:hover{background:#333;transform:translateY(-1px)}
+.admin-btn svg{width:14px;height:14px}
+.admin-btn.logged-in{background:#22c55e}
+.admin-btn.logged-in:hover{background:#16a34a}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:10000;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+.modal-overlay.show{display:flex;opacity:1}
+.modal{background:#18181b;border:1px solid #27272a;border-radius:16px;padding:32px;width:90%;max-width:380px;box-shadow:0 25px 80px rgba(0,0,0,0.5);transform:scale(0.95);transition:transform .3s}
+.modal-overlay.show .modal{transform:scale(1)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.modal-header h3{font-size:18px;font-weight:700;color:#fff}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:#27272a;color:#a1a1aa;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:#3f3f46;color:#fff}
+.modal-close svg{width:16px;height:16px}
+.modal .form-group{margin-bottom:16px}
+.modal .form-label{display:block;font-size:12px;font-weight:500;color:#a1a1aa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.modal .form-input{width:100%;padding:12px 14px;background:#0f0f13;border:1px solid #27272a;border-radius:10px;color:#e4e4e7;font-size:14px;font-family:inherit;transition:border-color .2s}
+.modal .form-input:focus{outline:none;border-color:#22c55e}
+.modal .form-input::placeholder{color:#52525b}
+.modal .btn-login{width:100%;padding:12px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;margin-top:8px}
+.modal .btn-login:hover{background:#16a34a}
+.modal-error{color:#ef4444;font-size:13px;margin-top:12px;text-align:center;display:none}
+
+.admin-panel{position:fixed;top:0;right:0;width:420px;max-width:90vw;height:100vh;background:#0f0f13;border-left:1px solid #27272a;z-index:9998;transform:translateX(100%);transition:transform .4s ease;overflow-y:auto;padding:80px 24px 24px}
+.admin-panel.open{transform:translateX(0)}
+.admin-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:9997;display:none;opacity:0;transition:opacity .3s}
+.admin-panel-overlay.show{display:block;opacity:1}
+
+.admin-panel h2{font-size:20px;font-weight:700;color:#fff;margin-bottom:4px}
+.admin-panel .sub{color:#71717a;font-size:13px;margin-bottom:24px}
+
+.admin-section{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin-bottom:16px}
+.admin-section h4{font-size:14px;font-weight:600;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.admin-section h4 svg{width:16px;height:16px;color:#22c55e}
+
+.admin-input{width:100%;padding:10px 12px;background:#0f0f13;border:1px solid #27272a;border-radius:8px;color:#e4e4e7;font-size:13px;font-family:inherit;margin-bottom:12px;transition:border-color .2s}
+.admin-input:focus{outline:none;border-color:#22c55e}
+.admin-input::placeholder{color:#52525b}
+.admin-label{display:block;font-size:11px;font-weight:500;color:#71717a;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+
+.admin-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.admin-textarea{width:100%;padding:10px 12px;background:#0f0f13;border:1px solid #27272a;border-radius:8px;color:#e4e4e7;font-size:13px;font-family:inherit;min-height:60px;resize:vertical;margin-bottom:12px}
+.admin-textarea:focus{outline:none;border-color:#22c55e}
+
+.admin-faq-item{background:#0f0f13;border:1px solid #27272a;border-radius:8px;padding:12px;margin-bottom:10px}
+.admin-faq-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.admin-faq-header span{font-size:11px;color:#52525b;font-weight:600;text-transform:uppercase}
+.admin-faq-delete{width:24px;height:24px;border-radius:6px;border:none;background:#27272a;color:#a1a1aa;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.admin-faq-delete:hover{background:#ef4444;color:#fff}
+.admin-faq-delete svg{width:12px;height:12px}
+
+.admin-btn-sm{padding:8px 16px;background:#27272a;color:#e4e4e7;border:1px solid #3f3f46;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit;display:inline-flex;align-items:center;gap:6px;margin-top:8px}
+.admin-btn-sm:hover{background:#3f3f46}
+.admin-btn-green{padding:10px 20px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;width:100%;margin-top:16px}
+.admin-btn-green:hover{background:#16a34a}
+.admin-btn-red{padding:10px 20px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;width:100%;margin-top:8px}
+.admin-btn-red:hover{background:#dc2626}
+
+.admin-image-box{border:2px dashed #3f3f46;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;position:relative;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center}
+.admin-image-box:hover{border-color:#22c55e}
+.admin-image-box.has-image{border-style:solid;border-color:#27272a;padding:0}
+.admin-image-box img{width:100%;max-height:150px;object-fit:cover;border-radius:8px}
+.admin-image-box input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.admin-image-placeholder{color:#71717a;font-size:12px}
+.admin-image-placeholder svg{width:28px;height:28px;margin-bottom:8px;color:#52525b;display:block;margin-left:auto;margin-right:auto}
+
+.admin-toggle{display:flex;align-items:center;gap:10px;margin-bottom:16px;cursor:pointer}
+.admin-toggle-switch{width:36px;height:20px;background:#3f3f46;border-radius:10px;position:relative;transition:background .2s}
+.admin-toggle-switch::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s}
+.admin-toggle input:checked+.admin-toggle-switch{background:#22c55e}
+.admin-toggle input:checked+.admin-toggle-switch::after{transform:translateX(16px)}
+.admin-toggle input{display:none}
+.admin-toggle-label{font-size:13px;color:#e4e4e7}
+
+.admin-color{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.admin-color input[type="color"]{width:40px;height:36px;border:1px solid #27272a;border-radius:6px;background:none;cursor:pointer}
+.admin-color input[type="text"]{flex:1;padding:8px 12px;background:#0f0f13;border:1px solid #27272a;border-radius:8px;color:#e4e4e7;font-size:13px;font-family:inherit}
+
+body.admin-mode .editable{position:relative;outline:2px dashed #22c55e;outline-offset:4px;cursor:text;transition:all .2s}
+body.admin-mode .editable:hover{outline:2px solid #22c55e;background:rgba(34,197,94,0.05)}
+body.admin-mode .editable::after{content:'EDIT';position:absolute;top:-20px;left:0;background:#22c55e;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:1px;pointer-events:none;opacity:0;transition:opacity .2s}
+body.admin-mode .editable:hover::after{opacity:1}
+
+.hero{min-height:50vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 20px 30px;position:relative}
+.brand{font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#888;margin-bottom:24px}
+.hero h1{font-size:clamp(32px,5vw,56px);font-weight:700;line-height:1.1;max-width:700px;margin-bottom:16px;color:#111}
+.hero-subtitle{font-size:16px;color:#666;margin-bottom:32px;font-weight:400}
+.btn-primary{background:#1a1a1a;color:#fff;padding:14px 28px;border-radius:100px;text-decoration:none;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:8px;transition:all .3s;border:none;cursor:pointer}
+.btn-primary:hover{background:#333;transform:translateY(-2px)}
+.creator-info{margin-top:16px;font-size:13px;color:#888}
+.creator-info a{color:#1a1a1a;text-decoration:none;font-weight:600}
+.scroll-indicator{margin-top:20px;animation:bounce 2s infinite}
+.scroll-indicator svg{width:24px;height:24px;color:#ccc}
+@keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}60%{transform:translateY(-5px)}}
+
+.tabs-section{padding:20px 20px 10px;text-align:center}
+.tabs-label{font-size:14px;color:#666;margin-bottom:20px;font-weight:500}
+.tabs{display:inline-flex;background:rgba(255,255,255,0.6);backdrop-filter:blur(10px);border-radius:100px;padding:6px;gap:4px;border:1px solid rgba(0,0,0,0.06);flex-wrap:wrap;justify-content:center}
+.tab{padding:10px 20px;border-radius:100px;border:none;background:transparent;font-size:13px;font-weight:500;color:#666;cursor:pointer;transition:all .3s;font-family:inherit;white-space:nowrap}
+.tab:hover{color:#1a1a1a}
+.tab.active{background:#1a1a1a;color:#fff}
+
+.content-section{display:none;max-width:800px;margin:0 auto;padding:40px 20px;animation:fadeIn .4s ease}
+.content-section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:clamp(24px,4vw,36px);font-weight:700;text-align:center;margin-bottom:16px;color:#111}
+.section-desc{text-align:center;color:#666;font-size:15px;max-width:500px;margin:0 auto 40px;line-height:1.7}
+
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:40px}
+.feature-card{background:rgba(255,255,255,0.7);backdrop-filter:blur(10px);border:1px solid rgba(0,0,0,0.06);border-radius:16px;padding:24px;transition:all .3s}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.08)}
+.feature-icon{width:32px;height:32px;background:#e8f5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.feature-icon svg{width:16px;height:16px;color:#4caf50}
+.feature-card h3{font-size:15px;font-weight:600;margin-bottom:4px;color:#111}
+.feature-card p{font-size:13px;color:#888}
+
+.faq{margin-bottom:40px}
+.faq-item{border-bottom:1px solid rgba(0,0,0,0.08);overflow:hidden}
+.faq-question{width:100%;padding:18px 0;background:none;border:none;text-align:left;font-size:14px;font-weight:500;color:#333;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:inherit;transition:color .3s;user-select:none}
+.faq-question:hover{color:#1a1a1a}
+.faq-question svg{width:18px;height:18px;color:#999;transition:transform .3s;flex-shrink:0;margin-left:12px}
+.faq-item.open .faq-question svg{transform:rotate(180deg)}
+.faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;font-size:14px;color:#666;line-height:1.6}
+.faq-item.open .faq-answer{max-height:300px;padding-bottom:18px}
+
+.cta-section{text-align:center;margin-bottom:60px}
+.btn-cta{padding:14px 32px;border-radius:100px;border:none;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .3s;font-family:inherit;display:inline-block;text-decoration:none}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+.cta-green{background:#22c55e}
+.cta-green:hover{background:#16a34a}
+.cta-orange{background:#f97316}
+.cta-orange:hover{background:#ea580c}
+.cta-blue{background:#3b82f6}
+.cta-blue:hover{background:#2563eb}
+.trust-badge{margin-top:12px;font-size:12px;color:#999}
+.trust-badge strong{color:#666}
+
+.screenshot-card{background:#1a1a2e;border-radius:16px;overflow:hidden;margin-bottom:32px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.screenshot-card img{width:100%;display:block}
+
+.community{text-align:center;padding:60px 20px;max-width:600px;margin:0 auto}
+.community h2{font-size:28px;font-weight:700;margin-bottom:24px;color:#111}
+.community-img{width:280px;height:280px;border-radius:20px;object-fit:cover;margin-bottom:20px;margin-left:auto;margin-right:auto;overflow:hidden;background:#3b82f6;display:flex;align-items:center;justify-content:center}
+.community-img img{width:100%;height:100%;object-fit:cover}
+.community p{color:#666;font-size:15px;margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto}
+.btn-discord{background:#5865F2;color:#fff;padding:12px 24px;border-radius:100px;text-decoration:none;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:8px;transition:all .3s}
+.btn-discord:hover{background:#4752C4;transform:translateY(-2px)}
+
+.footer{text-align:center;padding:40px 20px;border-top:1px solid rgba(0,0,0,0.06)}
+.footer-brand{font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#888;margin-bottom:8px}
+.footer-quote{font-size:12px;color:#aaa;margin-bottom:20px;font-style:italic}
+.footer-links{display:flex;justify-content:center;gap:24px}
+.footer-links a{font-size:13px;color:#888;text-decoration:none;transition:color .3s}
+.footer-links a:hover{color:#1a1a1a}
+
+.content-section{min-height:400px}
+.faq-item .faq-answer{padding:0 0 0 0;transition:max-height .3s ease,padding .3s ease}
+
+@media(max-width:640px){.tabs{border-radius:20px}.features{grid-template-columns:1fr}.community-img{width:220px;height:220px}.admin-panel{width:100%}.admin-row{grid-template-columns:1fr}}
+</style>
+<base target="_blank">
+<base target="_blank">
+<base target="_blank">
+</head>
+<body class="grid-bg">
+
+<div class="admin-bar" id="adminBar">
+    <button class="admin-btn" id="adminBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+        Admin
+    </button>
+</div>
+
+<div class="modal-overlay" id="loginModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Admin Login</h3>
+            <button class="modal-close" id="modalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="loginEmail" placeholder="rudalghur@gmail.com">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="loginPass" placeholder="Enter password">
+        </div>
+        <button class="btn-login" id="btnLogin">Login</button>
+        <div class="modal-error" id="loginError">Invalid email or password</div>
+    </div>
+</div>
+
+<div class="admin-panel-overlay" id="adminOverlay"></div>
+<div class="admin-panel" id="adminPanel">
+    <h2>Admin Panel</h2>
+    <p class="sub">Edit your site content directly</p>
+
+    <div class="admin-section">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Hero Section</h4>
+        <label class="admin-label">Brand Name</label>
+        <input type="text" class="admin-input" id="a-brand" value="XIS SENSI">
+        <label class="admin-label">Headline</label>
+        <input type="text" class="admin-input" id="a-headline" value="The same packs I use in my Free Fire highlights.">
+        <label class="admin-label">Subtitle</label>
+        <input type="text" class="admin-input" id="a-subtitle" value="Exactly the ones I use in the videos.">
+        <label class="admin-label">Creator Handle</label>
+        <input type="text" class="admin-input" id="a-handle" value="@xissensi">
+        <label class="admin-label">Followers Text</label>
+        <input type="text" class="admin-input" id="a-followers" value="+54,000 followers watching my Free Fire highlights.">
+    </div>
+
+    <div class="admin-section">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6"/></svg> Tab Names</h4>
+        <div class="admin-row">
+            <div><label class="admin-label">Sensitivity</label><input type="text" class="admin-input" id="a-tab-sens" value="Optimized Sensitivity"></div>
+            <div><label class="admin-label">Android</label><input type="text" class="admin-input" id="a-tab-and" value="Android Optimization"></div>
+        </div>
+        <label class="admin-label">Stuck Ice</label>
+        <input type="text" class="admin-input" id="a-tab-ice" value="Stuck Ice">
+        
+    </div>
+
+    <div class="admin-section">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg> Optimized Sensitivity</h4>
+        <label class="admin-toggle"><input type="checkbox" id="a-sens-on" checked><div class="admin-toggle-switch"></div><span class="admin-toggle-label">Show this section</span></label>
+        <label class="admin-label">Title</label>
+        <input type="text" class="admin-input" id="a-sens-title" value="Optimized sensitivity for perfect aiming.">
+        <label class="admin-label">Description</label>
+        <textarea class="admin-textarea" id="a-sens-desc">My sensitivity, combined with optimization, makes it smooth and wobble-free.
+Everything is perfectly adjusted so you can have the perfect aim.</textarea>
+        <label class="admin-label">Feature 1</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-sens-f1t" value="Less input lag"><input type="text" class="admin-input" id="a-sens-f1d" value="Faster response."></div>
+        <label class="admin-label">Feature 2</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-sens-f2t" value="Stable FPS"><input type="text" class="admin-input" id="a-sens-f2d" value="More consistency."></div>
+        <label class="admin-label">Feature 3</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-sens-f3t" value="Real control"><input type="text" class="admin-input" id="a-sens-f3d" value="A feeling of precision."></div>
+        <label class="admin-label">CTA Button Text</label>
+        <input type="text" class="admin-input" id="a-sens-cta" value="I want more performance.">
+        <label class="admin-label">CTA Color</label>
+        <div class="admin-color"><input type="color" id="a-sens-color" value="#22c55e"><input type="text" id="a-sens-color-t" value="#22c55e"></div>
+        <label class="admin-label">CTA Link URL</label>
+        <input type="text" class="admin-input" id="a-sens-link" value="" placeholder="https://...">
+        <label class="admin-label">FAQ Items</label>
+        <div id="a-sens-faq"></div>
+        <button class="admin-btn-sm" id="addFaqSens">+ Add FAQ</button>
+    </div>
+
+    <div class="admin-section">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg> Android Optimization</h4>
+        <label class="admin-toggle"><input type="checkbox" id="a-and-on" checked><div class="admin-toggle-switch"></div><span class="admin-toggle-label">Show this section</span></label>
+        <label class="admin-label">Title</label>
+        <input type="text" class="admin-input" id="a-and-title" value="The best optimization for Android.">
+        <label class="admin-label">Description</label>
+        <textarea class="admin-textarea" id="a-and-desc">Is your phone freezing in the middle of a game?
+Is your FPS dropping at the wrong time?
+Same hardware.
+Different result.</textarea>
+        <label class="admin-label">Feature 1</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-and-f1t" value="Less jammed"><input type="text" class="admin-input" id="a-and-f1d" value="Controlled background processes."></div>
+        <label class="admin-label">Feature 2</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-and-f2t" value="stable FPS"><input type="text" class="admin-input" id="a-and-f2d" value="Consistent frame rates throughout the match."></div>
+        <label class="admin-label">Feature 3</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-and-f3t" value="Lower input lag"><input type="text" class="admin-input" id="a-and-f3d" value="Faster response to touch."></div>
+        <label class="admin-label">CTA Button Text</label>
+        <input type="text" class="admin-input" id="a-and-cta" value="I want to optimize my Android.">
+        <label class="admin-label">CTA Color</label>
+        <div class="admin-color"><input type="color" id="a-and-color" value="#f97316"><input type="text" id="a-and-color-t" value="#f97316"></div>
+        <label class="admin-label">CTA Link URL</label>
+        <input type="text" class="admin-input" id="a-and-link" value="" placeholder="https://...">
+        <label class="admin-label">FAQ Items</label>
+        <div id="a-and-faq"></div>
+        <button class="admin-btn-sm" id="addFaqAnd">+ Add FAQ</button>
+    </div>
+
+    <div class="admin-section">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg> Stuck Ice</h4>
+        <label class="admin-toggle"><input type="checkbox" id="a-ice-on" checked><div class="admin-toggle-switch"></div><span class="admin-toggle-label">Show this section</span></label>
+        <label class="admin-label">Title</label>
+        <input type="text" class="admin-input" id="a-ice-title" value="Texture of Stuck Ice">
+        <label class="admin-label">Description</label>
+        <textarea class="admin-textarea" id="a-ice-desc">No details, just glued-on ice.
+That clean ice, you know?
+Ice is necessary for the texture to work.</textarea>
+        <label class="admin-label">Preview Image</label>
+        <div class="admin-image-box" id="a-ice-img-box">
+            <input type="file" id="a-ice-file" accept="image/*">
+            <div class="admin-image-placeholder" id="a-ice-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>Click to upload texture preview</div>
+            <img id="a-ice-preview" style="display:none">
+        </div>
+        <label class="admin-label">Feature 1</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-ice-f1t" value="Stuck ice"><input type="text" class="admin-input" id="a-ice-f1d" value="He leaves glued to his clothes lol"></div>
+        <label class="admin-label">Feature 2</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-ice-f2t" value="Easy application"><input type="text" class="admin-input" id="a-ice-f2d" value="No secrets."></div>
+        <label class="admin-label">Feature 3</label>
+        <div class="admin-row"><input type="text" class="admin-input" id="a-ice-f3t" value="Tutorial included."><input type="text" class="admin-input" id="a-ice-f3d" value="Easy installation."></div>
+        <label class="admin-label">CTA Button Text</label>
+        <input type="text" class="admin-input" id="a-ice-cta" value="I want the ice stuck.">
+        <label class="admin-label">CTA Color</label>
+        <div class="admin-color"><input type="color" id="a-ice-color" value="#3b82f6"><input type="text" id="a-ice-color-t" value="#3b82f6"></div>
+        <label class="admin-label">CTA Link URL</label>
+        <input type="text" class="admin-input" id="a-ice-link" value="" placeholder="https://...">
+        <label class="admin-label">FAQ Items</label>
+        <div id="a-ice-faq"></div>
+        <button class="admin-btn-sm" id="addFaqIce">+ Add FAQ</button>
+    </div>
+
+    <div class="admin-section">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg> Community</h4>
+        <label class="admin-label">Title</label>
+        <input type="text" class="admin-input" id="a-comm-title" value="Do you have any questions?">
+        <label class="admin-label">Description</label>
+        <input type="text" class="admin-input" id="a-comm-desc" value="Join the server and ask your questions directly to me or to the community.">
+        <label class="admin-label">Community Image</label>
+        <div class="admin-image-box" id="a-comm-img-box">
+            <input type="file" id="a-comm-file" accept="image/*">
+            <div class="admin-image-placeholder" id="a-comm-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>Click to upload community image</div>
+            <img id="a-comm-preview" style="display:none">
+        </div>
+        <label class="admin-label">Discord Button</label>
+        <input type="text" class="admin-input" id="a-comm-btn" value="Join Discord">
+        <label class="admin-label">Discord Link URL</label>
+        <input type="text" class="admin-input" id="a-dc-link" value="" placeholder="https://discord.gg/...">
+        <label class="admin-label">Footer Quote</label>
+        <input type="text" class="admin-input" id="a-footer-quote" value="Perfection is not the absence of flaws, but rather the harmony between them.">
+    </div>
+
+    <div class="admin-section">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg> Appearance</h4>
+        <label class="admin-label">Background Color</label>
+        <div class="admin-color"><input type="color" id="a-bg-color" value="#f5f5f7"><input type="text" id="a-bg-color-t" value="#f5f5f7"></div>
+        <label class="admin-toggle"><input type="checkbox" id="a-grid-on" checked><div class="admin-toggle-switch"></div><span class="admin-toggle-label">Show Grid Pattern</span></label>
+    </div>
+
+    <button class="admin-btn-green" id="applyChanges">Apply Changes</button>
+    <button class="admin-btn-red" id="logoutBtn">Logout</button>
+</div>
+
+<section class="hero">
+    <div class="brand editable" data-key="brand">XIS SENSI</div>
+    <h1 class="editable" data-key="headline">The same packs I use in my Free Fire highlights.</h1>
+    <p class="hero-subtitle editable" data-key="subtitle">Exactly the ones I use in the videos.</p>
+    
+    <p class="creator-info">Created by <a href="#" class="editable" data-key="handle">@xissensi</a> &mdash; <span class="editable" data-key="followers">+54,000 followers watching my Free Fire highlights.</span></p>
+    <div class="scroll-indicator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+</section>
+
+
+
+<section class="content-section active" id="sensitivity">
+    <h2 class="section-title editable" data-key="sens-title">Optimized sensitivity for perfect aiming.</h2>
+    <p class="section-desc editable" data-key="sens-desc">My sensitivity, combined with optimization, makes it smooth and wobble-free.<br>Everything is perfectly adjusted so you can have the perfect aim.</p>
+    <div class="features" id="sens-features">
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="sens-f1t">Less input lag</h3><p class="editable" data-key="sens-f1d">Faster response.</p></div>
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="sens-f2t">Stable FPS</h3><p class="editable" data-key="sens-f2d">More consistency.</p></div>
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="sens-f3t">Real control</h3><p class="editable" data-key="sens-f3d">A feeling of precision.</p></div>
+    </div>
+    <div class="faq" id="sens-faq">
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="sens-q1">Does it work on any PC?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="sens-a1">Yes, it works on all Windows PCs with any configuration.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="sens-q2">Is it safe?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="sens-a2">Absolutely. It only changes in-game sensitivity settings, nothing else.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="sens-q3">Can I revert to the old settings?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="sens-a3">Yes, a backup of your original settings is automatically created.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="sens-q4">Does it really help with FPS?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="sens-a4">The sensitivity pack itself focuses on aiming, but combined with our optimization it improves overall performance.</div></div>
+    </div>
+    <div class="cta-section">
+        <a href="" class="btn-cta cta-green editable" data-key="sens-cta" id="sens-link">I want more performance.</a>
+        <p class="trust-badge">Trusted by over <strong>500</strong> real customers.</p>
+    </div>
+</section>
+
+<section class="content-section" id="android">
+    <h2 class="section-title editable" data-key="and-title">The best optimization for Android.</h2>
+    <p class="section-desc editable" data-key="and-desc">Is your phone freezing in the middle of a game?<br>Is your FPS dropping at the wrong time?<br><br>Same hardware.<br>Different result.</p>
+    <div class="features" id="and-features">
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="and-f1t">Less jammed</h3><p class="editable" data-key="and-f1d">Controlled background processes.</p></div>
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="and-f2t">stable FPS</h3><p class="editable" data-key="and-f2d">Consistent frame rates throughout the match.</p></div>
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="and-f3t">Lower input lag</h3><p class="editable" data-key="and-f3d">Faster response to touch.</p></div>
+    </div>
+    <div class="faq" id="and-faq">
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="and-q1">Does it work on any Android device?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="and-a1">It functions on all Android devices. Sem excecoes.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="and-q2">Do I need root access?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="and-a2">No. All optimizations are done in the system and game settings, without needing root access.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="and-q3">Does it improve FPS in Free Fire?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="and-a3">Yes. The settings reduce background resource consumption and optimize the device's CPU and GPU performance in conjunction with the services.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="and-q4">Tutorial included?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="and-a4">Yes, you also receive the complete tutorial to perform the full optimization.</div></div>
+    </div>
+    <div class="cta-section">
+        <a href="" class="btn-cta cta-orange editable" data-key="and-cta" id="and-link">I want to optimize my Android.</a>
+        <p class="trust-badge">Trusted by over <strong>500</strong> real customers.</p>
+    </div>
+</section>
+
+<section class="content-section" id="stuckice">
+    <h2 class="section-title editable" data-key="ice-title">Texture of Stuck Ice</h2>
+    <p class="section-desc editable" data-key="ice-desc">No details, just glued-on ice.<br>That clean ice, you know?<br>Ice is necessary for the texture to work.</p>
+    <div class="screenshot-card" id="ice-screenshot"><img src="https://images.unsplash.com/photo-1612287230217-8c7c6c170b95?w=800&q=80" alt="Preview" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#1a1a2e 0%,#16213e 100%)';this.parentElement.style.height='300px';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';this.parentElement.innerHTML='<span style=\'color:#666;font-size:14px;\'>Texture Preview</span>';"></div>
+    <div class="features" id="ice-features">
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="ice-f1t">Stuck ice</h3><p class="editable" data-key="ice-f1d">He leaves glued to his clothes lol</p></div>
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="ice-f2t">Easy application</h3><p class="editable" data-key="ice-f2d">No secrets.</p></div>
+        <div class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div><h3 class="editable" data-key="ice-f3t">Tutorial included.</h3><p class="editable" data-key="ice-f3d">Easy installation.</p></div>
+    </div>
+    <div class="faq" id="ice-faq">
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="ice-q1">What is &quot;Gelo Colado&quot;?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="ice-a1">&quot;Stuck Ice&quot; refers to the old-fashioned ice that would come off near you when you threw the shot. It makes the clip look nicer.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="ice-q2">On which devices does it work?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="ice-a2">It works on Android and emulators (PC).</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="ice-q3">Is there a tutorial on how to apply it?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="ice-a3">Yes. You receive a complete tutorial on how to apply the texture.</div></div>
+        <div class="faq-item"><button class="faq-question"><span class="editable" data-key="ice-q4">Is it easy to apply the texture?</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer editable" data-key="ice-a4">Yes, it doesn't take 2 minutes.</div></div>
+    </div>
+    <div class="cta-section">
+        <a href="" class="btn-cta cta-blue editable" data-key="ice-cta" id="ice-link">I want the ice stuck.</a>
+        <p class="trust-badge">Trusted by over <strong>500</strong> real customers.</p>
+    </div>
+</section>
+
+<section class="community">
+    <h2 class="editable" data-key="comm-title">Do you have any questions?</h2>
+    <div class="community-img" id="comm-img"><img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80" alt="Community" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=80 height=80 viewBox=\'0 0 24 24\' fill=none stroke=white stroke-width=1.5><circle cx=12 cy=8 r=4/><path d=\'M4 20c0-4 4-6 8-6s8 2 8 6\'/></svg>';"></div>
+    <p class="editable" data-key="comm-desc">Join the server and ask your questions directly to me or to the community.</p>
+    <a href="" class="btn-discord editable" data-key="comm-btn" id="dc-link">Join Discord</a>
+</section>
+
+<footer class="footer">
+    <div class="footer-brand editable" data-key="brand">XIS SENSI</div>
+    <p class="footer-quote editable" data-key="footer-quote">Perfection is not the absence of flaws, but rather the harmony between them.</p>
+    <div class="footer-links">
+        <a href="#" class="editable" data-key="footer-link1">Terms</a>
+        <a href="#" class="editable" data-key="footer-link2">Policy</a>
+        <a href="#" class="editable" data-key="footer-link3">Contact</a>
+    </div>
+</footer>
+
+<script>
+// ===== LOGIN SYSTEM =====
+var isLoggedIn = false;
+var adminImages = {};
+
+function openLogin() {
+    if (isLoggedIn) { openAdmin(); return; }
+    document.getElementById('loginModal').classList.add('show');
+    document.getElementById('loginEmail').focus();
+}
+function closeLogin() {
+    document.getElementById('loginModal').classList.remove('show');
+    document.getElementById('loginError').style.display = 'none';
+}
+function doLogin() {
+    var email = document.getElementById('loginEmail').value.trim();
+    var pass = document.getElementById('loginPass').value;
+    if (email === 'rudalghur@gmail.com' && pass === 'realrudal12') {
+        isLoggedIn = true;
+        closeLogin();
+        document.getElementById('adminBtn').classList.add('logged-in');
+        document.getElementById('adminBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Admin';
+        document.body.classList.add('admin-mode');
+        openAdmin();
+        loadAdminData();
+        showToast('Welcome, Admin!');
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+    }
+}
+
+function openAdmin() {
+    document.getElementById('adminPanel').classList.add('open');
+    document.getElementById('adminOverlay').classList.add('show');
+}
+function closeAdmin() {
+    document.getElementById('adminPanel').classList.remove('open');
+    document.getElementById('adminOverlay').classList.remove('show');
+}
+function logout() {
+    isLoggedIn = false;
+    document.getElementById('adminBtn').classList.remove('logged-in');
+    document.getElementById('adminBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg> Admin';
+    document.body.classList.remove('admin-mode');
+    closeAdmin();
+}
+
+function showToast(msg) {
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#22c55e;color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:500;z-index:100000;box-shadow:0 10px 40px rgba(34,197,94,0.3);animation:slideIn .3s ease';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function() { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; setTimeout(function() { t.remove(); }, 300); }, 2500);
+}
+
+function addAdminFaq(section) {
+    var container = document.getElementById('a-' + section + '-faq');
+    var count = container.children.length;
+    var div = document.createElement('div');
+    div.className = 'admin-faq-item';
+    div.innerHTML = '<div class="admin-faq-header"><span>FAQ ' + (count + 1) + '</span><button class="admin-faq-delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button></div><input type="text" class="admin-input faq-q" placeholder="Question" style="margin-bottom:8px"><input type="text" class="admin-input faq-a" placeholder="Answer">';
+    container.appendChild(div);
+    div.querySelector('.admin-faq-delete').addEventListener('click', function() {
+        div.remove();
+        renumberAdminFaq(section);
+    });
+}
+function renumberAdminFaq(section) {
+    document.querySelectorAll('#a-' + section + '-faq .admin-faq-item').forEach(function(item, i) {
+        item.querySelector('.admin-faq-header span').textContent = 'FAQ ' + (i + 1);
+    });
+}
+
+function adminImageUpload(input, key) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        adminImages[key] = e.target.result;
+        var preview = document.getElementById('a-' + key + '-preview');
+        var placeholder = document.getElementById('a-' + key + '-placeholder');
+        var box = document.getElementById('a-' + key + '-img-box');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+        box.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
+}
+
+function applyChanges() {
+    setText('brand', document.getElementById('a-brand').value);
+    setText('headline', document.getElementById('a-headline').value);
+    setText('subtitle', document.getElementById('a-subtitle').value);
+    setText('handle', document.getElementById('a-handle').value);
+    setText('followers', document.getElementById('a-followers').value);
+
+    
+    var tabs = document.querySelectorAll('.tab');
+    if (tabs[0]) tabs[0].textContent = document.getElementById('a-tab-sens').value;
+    if (tabs[1]) tabs[1].textContent = document.getElementById('a-tab-and').value;
+    if (tabs[2]) tabs[2].textContent = document.getElementById('a-tab-ice').value;
+
+    var sensOn = document.getElementById('a-sens-on').checked;
+    document.getElementById('sensitivity').style.display = sensOn ? 'block' : 'none';
+    if (sensOn) {
+        setText('sens-title', document.getElementById('a-sens-title').value);
+        setText('sens-desc', document.getElementById('a-sens-desc').value.replace(/\n/g, '<br>'));
+        setText('sens-f1t', document.getElementById('a-sens-f1t').value);
+        setText('sens-f1d', document.getElementById('a-sens-f1d').value);
+        setText('sens-f2t', document.getElementById('a-sens-f2t').value);
+        setText('sens-f2d', document.getElementById('a-sens-f2d').value);
+        setText('sens-f3t', document.getElementById('a-sens-f3t').value);
+        setText('sens-f3d', document.getElementById('a-sens-f3d').value);
+        var sensCta = document.querySelector('[data-key="sens-cta"]');
+        if (sensCta) { 
+            sensCta.textContent = document.getElementById('a-sens-cta').value; 
+            sensCta.style.background = document.getElementById('a-sens-color').value; 
+            var sensLink = document.getElementById('a-sens-link').value.trim();
+            if (sensLink) sensCta.href = sensLink;
+        }
+        applyAdminFaq('sens', 'sens');
+    }
+
+    var andOn = document.getElementById('a-and-on').checked;
+    document.getElementById('android').style.display = andOn ? 'block' : 'none';
+    if (andOn) {
+        setText('and-title', document.getElementById('a-and-title').value);
+        setText('and-desc', document.getElementById('a-and-desc').value.replace(/\n/g, '<br>'));
+        setText('and-f1t', document.getElementById('a-and-f1t').value);
+        setText('and-f1d', document.getElementById('a-and-f1d').value);
+        setText('and-f2t', document.getElementById('a-and-f2t').value);
+        setText('and-f2d', document.getElementById('a-and-f2d').value);
+        setText('and-f3t', document.getElementById('a-and-f3t').value);
+        setText('and-f3d', document.getElementById('a-and-f3d').value);
+        var andCta = document.querySelector('[data-key="and-cta"]');
+        if (andCta) { 
+            andCta.textContent = document.getElementById('a-and-cta').value; 
+            andCta.style.background = document.getElementById('a-and-color').value; 
+            var andLink = document.getElementById('a-and-link').value.trim();
+            if (andLink) andCta.href = andLink;
+        }
+        applyAdminFaq('and', 'and');
+    }
+
+    var iceOn = document.getElementById('a-ice-on').checked;
+    document.getElementById('stuckice').style.display = iceOn ? 'block' : 'none';
+    if (iceOn) {
+        setText('ice-title', document.getElementById('a-ice-title').value);
+        setText('ice-desc', document.getElementById('a-ice-desc').value.replace(/\n/g, '<br>'));
+        setText('ice-f1t', document.getElementById('a-ice-f1t').value);
+        setText('ice-f1d', document.getElementById('a-ice-f1d').value);
+        setText('ice-f2t', document.getElementById('a-ice-f2t').value);
+        setText('ice-f2d', document.getElementById('a-ice-f2d').value);
+        setText('ice-f3t', document.getElementById('a-ice-f3t').value);
+        setText('ice-f3d', document.getElementById('a-ice-f3d').value);
+        var iceCta = document.querySelector('[data-key="ice-cta"]');
+        if (iceCta) { 
+            iceCta.textContent = document.getElementById('a-ice-cta').value; 
+            iceCta.style.background = document.getElementById('a-ice-color').value; 
+            var iceLink = document.getElementById('a-ice-link').value.trim();
+            if (iceLink) iceCta.href = iceLink;
+        }
+        if (adminImages.ice) {
+            var iceImg = document.querySelector('#ice-screenshot img');
+            if (iceImg) iceImg.src = adminImages.ice;
+        }
+        applyAdminFaq('ice', 'ice');
+    }
+
+    setText('comm-title', document.getElementById('a-comm-title').value);
+    setText('comm-desc', document.getElementById('a-comm-desc').value);
+    var commBtn = document.querySelector('[data-key="comm-btn"]');
+    if (commBtn) {
+        commBtn.textContent = document.getElementById('a-comm-btn').value;
+        var dcLink = document.getElementById('a-dc-link').value.trim();
+        if (dcLink) commBtn.href = dcLink;
+    }
+    setText('footer-quote', document.getElementById('a-footer-quote').value);
+    if (adminImages.comm) {
+        var commImg = document.querySelector('#comm-img img');
+        if (commImg) commImg.src = adminImages.comm;
+    }
+
+    document.body.style.background = document.getElementById('a-bg-color').value;
+    if (!document.getElementById('a-grid-on').checked) {
+        document.body.classList.remove('grid-bg');
+    } else {
+        document.body.classList.add('grid-bg');
+    }
+
+    saveAdminData();
+    showToast('Changes applied and saved!');
+}
+
+function setText(key, value) {
+    var el = document.querySelector('[data-key="' + key + '"]');
+    if (el) el.innerHTML = value;
+}
+
+function applyAdminFaq(adminSec, siteSec) {
+    var items = document.querySelectorAll('#a-' + adminSec + '-faq .admin-faq-item');
+    var container = document.getElementById(siteSec + '-faq');
+    if (!container) return;
+    container.innerHTML = '';
+    items.forEach(function(item, i) {
+        var q = item.querySelector('.faq-q').value;
+        var a = item.querySelector('.faq-a').value;
+        if (!q) return;
+        var div = document.createElement('div');
+        div.className = 'faq-item';
+        div.innerHTML = '<button class="faq-question"><span>' + esc(q) + '</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button><div class="faq-answer">' + esc(a) + '</div>';
+        container.appendChild(div);
+    });
+    // Small delay to ensure DOM is ready before attaching handlers
+    setTimeout(function() { attachFaqHandlers(container); }, 10);
+}
+
+function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function attachFaqHandlers(container) {
+    var scope = container || document;
+    scope.querySelectorAll('.faq-question').forEach(function(btn) {
+        // Remove existing listeners to prevent duplicates by replacing the element
+        var newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var item = this.parentElement;
+            var wasOpen = item.classList.contains('open');
+            // Close all others in same FAQ group
+            item.parentElement.querySelectorAll('.faq-item').forEach(function(f) {
+                f.classList.remove('open');
+            });
+            // Toggle this one
+            if (!wasOpen) item.classList.add('open');
+        });
+    });
+}
+
+function saveAdminData() {
+    var data = {
+        brand: document.getElementById('a-brand').value,
+        headline: document.getElementById('a-headline').value,
+        subtitle: document.getElementById('a-subtitle').value,
+        handle: document.getElementById('a-handle').value,
+        followers: document.getElementById('a-followers').value,
+        
+        
+        
+        
+        sensOn: document.getElementById('a-sens-on').checked,
+        sensTitle: document.getElementById('a-sens-title').value,
+        sensDesc: document.getElementById('a-sens-desc').value,
+        sensCta: document.getElementById('a-sens-cta').value,
+        sensColor: document.getElementById('a-sens-color').value,
+        sensLink: document.getElementById('a-sens-link').value,
+        andOn: document.getElementById('a-and-on').checked,
+        andTitle: document.getElementById('a-and-title').value,
+        andDesc: document.getElementById('a-and-desc').value,
+        andCta: document.getElementById('a-and-cta').value,
+        andColor: document.getElementById('a-and-color').value,
+        andLink: document.getElementById('a-and-link').value,
+        iceOn: document.getElementById('a-ice-on').checked,
+        iceTitle: document.getElementById('a-ice-title').value,
+        iceDesc: document.getElementById('a-ice-desc').value,
+        iceCta: document.getElementById('a-ice-cta').value,
+        iceColor: document.getElementById('a-ice-color').value,
+        iceLink: document.getElementById('a-ice-link').value,
+        commTitle: document.getElementById('a-comm-title').value,
+        commDesc: document.getElementById('a-comm-desc').value,
+        commBtn: document.getElementById('a-comm-btn').value,
+        dcLink: document.getElementById('a-dc-link').value,
+        footerQuote: document.getElementById('a-footer-quote').value,
+        bgColor: document.getElementById('a-bg-color').value,
+        gridOn: document.getElementById('a-grid-on').checked
+    };
+    localStorage.setItem('xissensi_admin_data', JSON.stringify(data));
+    localStorage.setItem('xissensi_admin_images', JSON.stringify(adminImages));
+}
+
+function loadAdminData() {
+    var saved = localStorage.getItem('xissensi_admin_data');
+    if (!saved) return;
+    var d = JSON.parse(saved);
+    if (d.brand) document.getElementById('a-brand').value = d.brand;
+    if (d.headline) document.getElementById('a-headline').value = d.headline;
+    if (d.subtitle) document.getElementById('a-subtitle').value = d.subtitle;
+    if (d.handle) document.getElementById('a-handle').value = d.handle;
+    if (d.followers) document.getElementById('a-followers').value = d.followers;
+    
+    
+    
+    
+    if (d.sensOn !== undefined) document.getElementById('a-sens-on').checked = d.sensOn;
+    if (d.sensTitle) document.getElementById('a-sens-title').value = d.sensTitle;
+    if (d.sensDesc) document.getElementById('a-sens-desc').value = d.sensDesc;
+    if (d.sensCta) document.getElementById('a-sens-cta').value = d.sensCta;
+    if (d.sensColor) { document.getElementById('a-sens-color').value = d.sensColor; document.getElementById('a-sens-color-t').value = d.sensColor; }
+    if (d.sensLink !== undefined) document.getElementById('a-sens-link').value = d.sensLink;
+    if (d.andOn !== undefined) document.getElementById('a-and-on').checked = d.andOn;
+    if (d.andTitle) document.getElementById('a-and-title').value = d.andTitle;
+    if (d.andDesc) document.getElementById('a-and-desc').value = d.andDesc;
+    if (d.andCta) document.getElementById('a-and-cta').value = d.andCta;
+    if (d.andColor) { document.getElementById('a-and-color').value = d.andColor; document.getElementById('a-and-color-t').value = d.andColor; }
+    if (d.andLink !== undefined) document.getElementById('a-and-link').value = d.andLink;
+    if (d.iceOn !== undefined) document.getElementById('a-ice-on').checked = d.iceOn;
+    if (d.iceTitle) document.getElementById('a-ice-title').value = d.iceTitle;
+    if (d.iceDesc) document.getElementById('a-ice-desc').value = d.iceDesc;
+    if (d.iceCta) document.getElementById('a-ice-cta').value = d.iceCta;
+    if (d.iceColor) { document.getElementById('a-ice-color').value = d.iceColor; document.getElementById('a-ice-color-t').value = d.iceColor; }
+    if (d.iceLink !== undefined) document.getElementById('a-ice-link').value = d.iceLink;
+    if (d.commTitle) document.getElementById('a-comm-title').value = d.commTitle;
+    if (d.commDesc) document.getElementById('a-comm-desc').value = d.commDesc;
+    if (d.commBtn) document.getElementById('a-comm-btn').value = d.commBtn;
+    if (d.dcLink !== undefined) document.getElementById('a-dc-link').value = d.dcLink;
+    if (d.footerQuote) document.getElementById('a-footer-quote').value = d.footerQuote;
+    if (d.bgColor) { document.getElementById('a-bg-color').value = d.bgColor; document.getElementById('a-bg-color-t').value = d.bgColor; }
+    if (d.gridOn !== undefined) document.getElementById('a-grid-on').checked = d.gridOn;
+
+    var savedImages = localStorage.getItem('xissensi_admin_images');
+    if (savedImages) {
+        adminImages = JSON.parse(savedImages);
+        if (adminImages.ice) {
+            document.getElementById('a-ice-preview').src = adminImages.ice;
+            document.getElementById('a-ice-preview').style.display = 'block';
+            document.getElementById('a-ice-placeholder').style.display = 'none';
+            document.getElementById('a-ice-img-box').classList.add('has-image');
+        }
+        if (adminImages.comm) {
+            document.getElementById('a-comm-preview').src = adminImages.comm;
+            document.getElementById('a-comm-preview').style.display = 'block';
+            document.getElementById('a-comm-placeholder').style.display = 'none';
+            document.getElementById('a-comm-img-box').classList.add('has-image');
+        }
+    }
+    applyChanges();
+}
+
+// ===== EVENT LISTENERS =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Admin button
+    document.getElementById('adminBtn').addEventListener('click', openLogin);
+
+    // Modal close
+    document.getElementById('modalClose').addEventListener('click', closeLogin);
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+        if (e.target === this) closeLogin();
+    });
+
+    // Login button
+    document.getElementById('btnLogin').addEventListener('click', doLogin);
+    document.getElementById('loginPass').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') doLogin();
+    });
+
+    // Admin overlay close
+    document.getElementById('adminOverlay').addEventListener('click', closeAdmin);
+
+    // Apply changes
+    document.getElementById('applyChanges').addEventListener('click', applyChanges);
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+
+    // Add FAQ buttons
+    document.getElementById('addFaqSens').addEventListener('click', function() { addAdminFaq('sens'); });
+    document.getElementById('addFaqAnd').addEventListener('click', function() { addAdminFaq('and'); });
+    document.getElementById('addFaqIce').addEventListener('click', function() { addAdminFaq('ice'); });
+
+    // Image uploads
+    document.getElementById('a-ice-file').addEventListener('change', function() { adminImageUpload(this, 'ice'); });
+    document.getElementById('a-comm-file').addEventListener('change', function() { adminImageUpload(this, 'comm'); });
+
+    // Color sync
+    ['sens','and','ice','bg'].forEach(function(c) {
+        var picker = document.getElementById('a-' + c + '-color');
+        var hex = document.getElementById('a-' + c + '-color-t');
+        if (picker && hex) {
+            picker.addEventListener('input', function() { hex.value = picker.value; });
+            hex.addEventListener('input', function() { picker.value = hex.value; });
+        }
+    });
+
+    // Tab switching - smooth without scroll jump
+    
+
+    // FAQ accordion
+    attachFaqHandlers(document);
+
+    // View packs button - smooth scroll
+    
+
+    // Load saved data
+    loadAdminData();
+});
+</script>
+</body>
+</html>
